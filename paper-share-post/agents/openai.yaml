@@ -1,0 +1,7 @@
+interface:
+  display_name: "论文分享帖助手"
+  short_description: "从论文PDF生成首页图表截图与900字以内中文分享帖"
+  default_prompt: "Use $paper-share-post to turn my uploaded paper PDF into screenshots and a Chinese paper-sharing Markdown post for native Chinese readers."
+
+policy:
+  allow_implicit_invocation: true

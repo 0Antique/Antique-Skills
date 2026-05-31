@@ -1,0 +1,7 @@
+interface:
+  display_name: "博客分享卡片助手"
+  short_description: "生成带个人Logo的中文知识卡片和截图"
+  default_prompt: "Use $blog-share-skills to turn my AI or technology blog topic into a Chinese blog draft, logo-branded HTML knowledge cards, rendered card screenshots, and a social sharing caption."
+
+policy:
+  allow_implicit_invocation: true

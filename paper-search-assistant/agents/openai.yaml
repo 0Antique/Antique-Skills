@@ -1,0 +1,7 @@
+interface:
+  display_name: "论文搜索助手"
+  short_description: "按会议、年份和主题整理论文合集表格"
+  default_prompt: "Use $paper-search-assistant to find recent papers for a target conference set and research topic."
+
+policy:
+  allow_implicit_invocation: true
