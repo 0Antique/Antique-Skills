@@ -1,6 +1,6 @@
 # Screenshot Specification
 
-Use this reference when creating or reviewing screenshot outputs.
+Use this reference when creating or reviewing screenshot outputs. Save screenshots under `YYYY/MM/MM-DD-论文名/screenshot/` by default.
 
 ## Required Screenshots
 
@@ -25,11 +25,12 @@ Default scope:
 
 ## Practical Cropping Workflow
 
-1. Render the first page directly to `0 文章第一页PDF截图.png`.
-2. Skim the PDF and list every target figure/table with page number.
-3. Render target pages to temporary page images.
-4. Crop target regions from rendered page images using pixel coordinates.
-5. Name outputs sequentially by sharing order.
-6. Visually inspect the final files before reporting completion.
+1. Create the output directory as `YYYY/MM/MM-DD-论文名/screenshot/`.
+2. Render the first page directly to `0 文章第一页PDF截图.png`.
+3. Skim the PDF and list every target figure/table with page number.
+4. Render target pages to temporary page images.
+5. Crop target regions from rendered page images using pixel coordinates.
+6. Name outputs sequentially by sharing order.
+7. Visually inspect the final files before reporting completion.
 
 If figure/table detection is uncertain, ask the user whether to include ambiguous visuals rather than silently skipping them.

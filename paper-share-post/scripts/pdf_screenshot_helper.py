@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
+from datetime import date, datetime
 from pathlib import Path
 
 
@@ -50,6 +52,66 @@ def parse_pages(spec: str, page_count: int) -> list[int]:
     if invalid:
         raise ValueError(f"Page(s) out of range 1-{page_count}: {invalid}")
     return sorted(pages)
+
+
+def safe_paper_name(title: str) -> str:
+    title = title.strip()
+    title = re.sub(r"\s+", " ", title)
+    title = re.sub(r'[\\/:*?"<>|]+', "-", title)
+    title = re.sub(r"\s*-\s*", "-", title)
+    title = title.strip(" .-_")
+    return title or "paper"
+
+
+def infer_title(pdf_path: Path) -> str:
+    fitz = require_fitz()
+    doc = fitz.open(pdf_path)
+    metadata_title = (doc.metadata or {}).get("title") or ""
+    if metadata_title.strip():
+        doc.close()
+        return metadata_title.strip()
+
+    page_text = doc.load_page(0).get_text("text")
+    doc.close()
+    lines = [line.strip() for line in page_text.splitlines() if line.strip()]
+    if not lines:
+        return pdf_path.stem
+
+    ignored = {
+        "abstract",
+        "introduction",
+        "proceedings",
+        "references",
+    }
+    candidates = [
+        line
+        for line in lines[:20]
+        if line.lower() not in ignored and 6 <= len(line) <= 180
+    ]
+    return candidates[0] if candidates else pdf_path.stem
+
+
+def parse_archive_date(value: str | None) -> date:
+    if value is None:
+        return date.today()
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except ValueError as exc:
+        raise ValueError("Date must use YYYY-MM-DD format.") from exc
+
+
+def init_output(pdf_path: Path, root_dir: Path, title: str | None, date_value: str | None) -> None:
+    archive_date = parse_archive_date(date_value)
+    paper_title = title.strip() if title and title.strip() else infer_title(pdf_path)
+    paper_name = safe_paper_name(paper_title)
+    paper_dir = root_dir / f"{archive_date:%Y}" / f"{archive_date:%m}" / f"{archive_date:%m-%d}-{paper_name}"
+    screenshot_dir = paper_dir / "screenshot"
+    markdown_path = paper_dir / "论文分享.md"
+    screenshot_dir.mkdir(parents=True, exist_ok=True)
+    print(f"paper_dir={paper_dir}")
+    print(f"screenshot_dir={screenshot_dir}")
+    print(f"markdown_path={markdown_path}")
+    print(f"title={paper_title}")
 
 
 def render_pages(pdf_path: Path, out_dir: Path, pages: list[int], dpi: int) -> None:
@@ -113,6 +175,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
 
+    init = subparsers.add_parser("init", help="Create the default date archive output folders.")
+    init.add_argument("pdf", type=Path)
+    init.add_argument("root_dir", type=Path)
+    init.add_argument("--date", help="Archive date in YYYY-MM-DD format. Defaults to today.")
+    init.add_argument("--title", help="Paper title to use in the output folder name.")
+
     first = subparsers.add_parser("first", help="Render the first PDF page.")
     first.add_argument("pdf", type=Path)
     first.add_argument("out_dir", type=Path)
@@ -129,7 +197,9 @@ def main() -> int:
     crop.add_argument("out_dir", type=Path)
 
     args = parser.parse_args()
-    if args.command == "first":
+    if args.command == "init":
+        init_output(args.pdf, args.root_dir, args.title, args.date)
+    elif args.command == "first":
         render_first(args.pdf, args.out_dir, args.dpi)
     elif args.command == "render":
         fitz = require_fitz()
