@@ -1,5 +1,7 @@
 # Antique-Skills
 
+author：Antique
+
 A personal collection of custom Claude Skills maintained by the repository owner.
 
 This repository contains skills for Chinese technical blog sharing and research-paper workflows. Each skill lives in its own folder and is defined by a `SKILL.md` file, sometimes with supporting references or scripts.
